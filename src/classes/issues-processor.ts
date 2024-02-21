@@ -667,16 +667,16 @@ export class IssuesProcessor {
       `$$type marked stale on: ${LoggerService.cyan(markedStaleOn)}`
     );
 
-    const issueHasCommentsSinceStale: boolean = await this._hasCommentsSince(
-      issue,
-      markedStaleOn,
-      staleMessage
-    );
-    issueLogger.info(
-      `$$type has been commented on: ${LoggerService.cyan(
-        issueHasCommentsSinceStale
-      )}`
-    );
+    // const issueHasCommentsSinceStale: boolean = await this._hasCommentsSince(
+    //   issue,
+    //   markedStaleOn,
+    //   staleMessage
+    // );
+    // issueLogger.info(
+    //   `$$type has been commented on: ${LoggerService.cyan(
+    //     issueHasCommentsSinceStale
+    //   )}`
+    // );
 
     const daysBeforeClose: number = issue.isPullRequest
       ? this._getDaysBeforePrClose()
@@ -729,7 +729,7 @@ export class IssuesProcessor {
     // Should we un-stale this issue?
     if (
       shouldRemoveStaleWhenUpdated &&
-      (issueHasUpdateSinceStale || issueHasCommentsSinceStale) &&
+      issueHasUpdateSinceStale &&
       !issue.markedStaleThisRun
     ) {
       issueLogger.info(
@@ -765,7 +765,7 @@ export class IssuesProcessor {
       )}`
     );
 
-    if (!issueHasCommentsSinceStale && !issueHasUpdateInCloseWindow) {
+    if (!issueHasUpdateInCloseWindow) {
       issueLogger.info(
         `Closing $$type because it was last updated on: ${LoggerService.cyan(
           issue.updated_at
@@ -784,7 +784,7 @@ export class IssuesProcessor {
       }
     } else {
       issueLogger.info(
-        `Stale $$type is not old enough to close yet (hasComments? ${issueHasCommentsSinceStale}, hasUpdate? ${issueHasUpdateInCloseWindow})`
+        `Stale $$type is not old enough to close yet (hasUpdate? ${issueHasUpdateInCloseWindow})`
       );
     }
   }

@@ -757,8 +757,16 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
             issueLogger.info(`$$type marked stale on: ${logger_service_1.LoggerService.cyan(markedStaleOn)}`);
-            const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
-            issueLogger.info(`$$type has been commented on: ${logger_service_1.LoggerService.cyan(issueHasCommentsSinceStale)}`);
+            // const issueHasCommentsSinceStale: boolean = await this._hasCommentsSince(
+            //   issue,
+            //   markedStaleOn,
+            //   staleMessage
+            // );
+            // issueLogger.info(
+            //   `$$type has been commented on: ${LoggerService.cyan(
+            //     issueHasCommentsSinceStale
+            //   )}`
+            // );
             const daysBeforeClose = issue.isPullRequest
                 ? this._getDaysBeforePrClose()
                 : this._getDaysBeforeIssueClose();
@@ -781,7 +789,7 @@ class IssuesProcessor {
             issueLogger.info(`$$type has been updated since it was marked stale: ${logger_service_1.LoggerService.cyan(issueHasUpdateSinceStale)}`);
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated &&
-                (issueHasUpdateSinceStale || issueHasCommentsSinceStale) &&
+                issueHasUpdateSinceStale &&
                 !issue.markedStaleThisRun) {
                 issueLogger.info(`Remove the stale label since the $$type has been updated and the workflow should remove the stale label when updated`);
                 yield this._removeStaleLabel(issue, staleLabel);
@@ -797,7 +805,7 @@ class IssuesProcessor {
             }
             const issueHasUpdateInCloseWindow = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
             issueLogger.info(`$$type has been updated in the last ${daysBeforeClose} days: ${logger_service_1.LoggerService.cyan(issueHasUpdateInCloseWindow)}`);
-            if (!issueHasCommentsSinceStale && !issueHasUpdateInCloseWindow) {
+            if (!issueHasUpdateInCloseWindow) {
                 issueLogger.info(`Closing $$type because it was last updated on: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
                 yield this._closeIssue(issue, closeMessage, closeLabel);
                 if (this.options.deleteBranch && issue.pull_request) {
@@ -807,7 +815,7 @@ class IssuesProcessor {
                 }
             }
             else {
-                issueLogger.info(`Stale $$type is not old enough to close yet (hasComments? ${issueHasCommentsSinceStale}, hasUpdate? ${issueHasUpdateInCloseWindow})`);
+                issueLogger.info(`Stale $$type is not old enough to close yet (hasUpdate? ${issueHasUpdateInCloseWindow})`);
             }
         });
     }
